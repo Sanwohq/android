@@ -18,9 +18,8 @@ jobs:
           java-version: '17'
 
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          generate-job-summary: false
 
       - name: Build
-        run: ./gradlew :sanwo:build :paystack:build :flutterwave:build
-
-      - name: Run tests
-        run: ./gradlew :sanwo:test
+        run: gradle build
