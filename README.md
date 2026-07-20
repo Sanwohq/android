@@ -111,10 +111,10 @@ class PaymentActivity : AppCompatActivity() {
 }
 ```
 
-#### Option B: Convenience method
+#### Option B: Callable pattern
 
 ```kotlin
-sanwo.checkout(
+sanwo(
     activity = this,
     options = CheckoutOptions(
         amount = 500000,
@@ -131,7 +131,7 @@ sanwo.checkout(
 )
 ```
 
-When using the convenience method, add this to your Activity:
+When using the callable pattern, add this to your Activity:
 
 ```kotlin
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

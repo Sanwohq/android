@@ -10,7 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
  * Main entry point for the Sanwo payment SDK.
  *
  * Create an instance with a [SanwoProvider] and your public key, register event listeners,
- * then call [checkout] to present the payment UI.
+ * then call the instance directly to present the payment UI.
  *
  * ```kotlin
  * val sanwo = Sanwo(
@@ -22,7 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
  *     Log.d("Sanwo", "Payment succeeded: ${event.data}")
  * }
  *
- * sanwo.checkout(
+ * sanwo(
  *     activity = this,
  *     options = CheckoutOptions(
  *         amount = 500000,
@@ -131,7 +131,7 @@ class Sanwo(
 
     /**
      * Convenience method that registers a launcher, starts the checkout, and delivers the result
-     * -- all in one call.
+     * -- all in one call. Supports the callable pattern: `sanwo(activity, options) { result -> }`.
      *
      * **Note:** Because `registerForActivityResult` must be called before `STARTED`, this method
      * uses `startActivityForResult` under the hood (deprecated but functional). For lifecycle-safe
@@ -142,7 +142,7 @@ class Sanwo(
      * @param onResult Callback receiving the [CheckoutResult].
      */
     @Suppress("DEPRECATION")
-    fun checkout(
+    operator fun invoke(
         activity: Activity,
         options: CheckoutOptions,
         onResult: (CheckoutResult) -> Unit,
@@ -197,8 +197,8 @@ class Sanwo(
         private const val REQUEST_CODE = 0x53_41  // "SA" in hex
 
         /**
-         * Call this from your Activity's `onActivityResult` if you used the convenience
-         * [checkout] method (which uses the deprecated `startActivityForResult`).
+         * Call this from your Activity's `onActivityResult` if you used the callable
+         * [invoke] pattern (which uses the deprecated `startActivityForResult`).
          *
          * ```kotlin
          * override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
