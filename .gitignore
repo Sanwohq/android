@@ -1,0 +1,32 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar
+bin/
+gen/
+out/
+release/
+
+# Kotlin
+*.kotlin_module
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
