@@ -14,7 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
  *
  * ```kotlin
  * val sanwo = Sanwo(
- *     provider = SanwoProviders.paystack,
+ *     provider = paystackProvider,  // from com.sanwohq.paystack
  *     publicKey = "pk_test_..."
  * )
  *
@@ -65,7 +65,7 @@ class Sanwo(
      *
      * ```kotlin
      * class PaymentActivity : AppCompatActivity() {
-     *     private val sanwo = Sanwo(SanwoProviders.paystack, "pk_test_...")
+     *     private val sanwo = Sanwo(paystackProvider, "pk_test_...")
      *     private lateinit var launcher: ActivityResultLauncher<Intent>
      *
      *     override fun onCreate(savedInstanceState: Bundle?) {

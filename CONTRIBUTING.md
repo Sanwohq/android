@@ -39,10 +39,12 @@ Thank you for considering contributing to Sanwo! This document outlines the proc
 
 ## Adding a New Provider
 
-1. Create a new template file in `sanwo/src/main/kotlin/com/sanwohq/android/templates/` (e.g. `StripeTemplate.kt`)
-2. The template must include `{{sanwoBridge}}` and `{{params}}` placeholders
-3. Add the provider to `SanwoProviders.kt`
-4. Test the provider thoroughly
+1. Create a new Gradle module at the project root (e.g. `stripe/`) following the pattern in `paystack/` or `flutterwave/`
+2. Add the module to `settings.gradle.kts` with `include(":stripe")`
+3. Create a `build.gradle.kts` with `implementation(project(":sanwo"))` as a dependency
+4. Create a provider file (e.g. `StripeProvider.kt`) that exports a `SanwoProvider` instance
+5. The HTML template must include `{{sanwoBridge}}` and `{{params}}` placeholders
+6. Test the provider thoroughly
 
 ### Template Requirements
 

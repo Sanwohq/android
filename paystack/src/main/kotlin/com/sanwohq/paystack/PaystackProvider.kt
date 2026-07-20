@@ -1,9 +1,18 @@
-package com.sanwohq.android.templates
+package com.sanwohq.paystack
 
-internal object PaystackTemplate {
+import com.sanwohq.android.SanwoProvider
 
-    val html: String = """
-<!DOCTYPE html>
+val paystackProvider = SanwoProvider(
+    id = "paystack",
+    name = "paystack",
+    displayName = "Paystack",
+    template = PAYSTACK_TEMPLATE,
+    amountInMinorUnit = true,
+    supportedCurrencies = listOf("NGN", "GHS", "ZAR", "USD", "KES"),
+    supportedCountries = listOf("NG", "GH", "ZA", "US", "KE"),
+)
+
+private const val PAYSTACK_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -49,6 +58,4 @@ internal object PaystackTemplate {
     }
   </script>
 </body>
-</html>
-    """.trimIndent()
-}
+</html>"""

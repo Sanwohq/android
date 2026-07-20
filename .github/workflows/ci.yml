@@ -20,7 +20,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build
-        run: ./gradlew :sanwo:build
+        run: ./gradlew :sanwo:build :paystack:build :flutterwave:build
 
       - name: Run tests
         run: ./gradlew :sanwo:test

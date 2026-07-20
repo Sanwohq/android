@@ -1,9 +1,18 @@
-package com.sanwohq.android.templates
+package com.sanwohq.flutterwave
 
-internal object FlutterwaveTemplate {
+import com.sanwohq.android.SanwoProvider
 
-    val html: String = """
-<!DOCTYPE html>
+val flutterwaveProvider = SanwoProvider(
+    id = "flutterwave",
+    name = "flutterwave",
+    displayName = "Flutterwave",
+    template = FLUTTERWAVE_TEMPLATE,
+    amountInMinorUnit = false,
+    supportedCurrencies = listOf("NGN", "GHS", "ZAR", "USD", "KES", "UGX", "TZS", "RWF", "XAF", "XOF", "GBP", "EUR"),
+    supportedCountries = listOf("NG", "GH", "ZA", "US", "KE", "UG", "TZ", "RW", "CM", "CI", "GB"),
+)
+
+private const val FLUTTERWAVE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -49,6 +58,4 @@ internal object FlutterwaveTemplate {
     }
   </script>
 </body>
-</html>
-    """.trimIndent()
-}
+</html>"""

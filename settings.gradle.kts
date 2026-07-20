@@ -15,3 +15,5 @@ dependencyResolution {
 
 rootProject.name = "sanwo-android"
 include(":sanwo")
+include(":paystack")
+include(":flutterwave")

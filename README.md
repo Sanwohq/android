@@ -4,11 +4,16 @@ Universal payment SDK for Android. Integrate Paystack, Flutterwave, and other pa
 
 ## Installation
 
+Add the core SDK and the provider module(s) you need.
+
 ### Gradle (Kotlin DSL)
 
 ```kotlin
 dependencies {
-    implementation("com.sanwohq.android:sanwo:0.1.0")
+    implementation("com.sanwohq:android:0.1.0")
+    // Add one or more provider modules:
+    implementation("com.sanwohq:paystack:0.1.0")
+    implementation("com.sanwohq:flutterwave:0.1.0")
 }
 ```
 
@@ -16,7 +21,10 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.sanwohq.android:sanwo:0.1.0'
+    implementation 'com.sanwohq:android:0.1.0'
+    // Add one or more provider modules:
+    implementation 'com.sanwohq:paystack:0.1.0'
+    implementation 'com.sanwohq:flutterwave:0.1.0'
 }
 ```
 
@@ -26,10 +34,10 @@ dependencies {
 
 ```kotlin
 import com.sanwohq.android.Sanwo
-import com.sanwohq.android.SanwoProviders
+import com.sanwohq.paystack.paystackProvider
 
 val sanwo = Sanwo(
-    provider = SanwoProviders.paystack,
+    provider = paystackProvider,
     publicKey = "pk_test_..."
 )
 ```
@@ -58,7 +66,7 @@ Register the launcher in `onCreate`, then launch when ready:
 class PaymentActivity : AppCompatActivity() {
 
     private val sanwo = Sanwo(
-        provider = SanwoProviders.paystack,
+        provider = paystackProvider,
         publicKey = "pk_test_..."
     )
 
@@ -134,19 +142,24 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 
 ## Supported Providers
 
-| Provider | Object | Notes |
-|---|---|---|
-| Paystack | `SanwoProviders.paystack` | Amounts in kobo (minor units) |
-| Flutterwave | `SanwoProviders.flutterwave` | Amounts auto-converted from minor to major units |
+Each provider is shipped as a separate module so you only include what you need.
+
+| Provider | Module | Import | Notes |
+|---|---|---|---|
+| Paystack | `com.sanwohq:paystack` | `com.sanwohq.paystack.paystackProvider` | Amounts in kobo (minor units) |
+| Flutterwave | `com.sanwohq:flutterwave` | `com.sanwohq.flutterwave.flutterwaveProvider` | Amounts auto-converted from minor to major units |
 
 ### Switching providers
 
 ```kotlin
+import com.sanwohq.paystack.paystackProvider
+import com.sanwohq.flutterwave.flutterwaveProvider
+
 // Paystack
-val sanwo = Sanwo(provider = SanwoProviders.paystack, publicKey = "pk_test_...")
+val sanwo = Sanwo(provider = paystackProvider, publicKey = "pk_test_...")
 
 // Flutterwave
-val sanwo = Sanwo(provider = SanwoProviders.flutterwave, publicKey = "FLWPUBK_TEST-...")
+val sanwo = Sanwo(provider = flutterwaveProvider, publicKey = "FLWPUBK_TEST-...")
 ```
 
 ## Checkout Options
@@ -195,7 +208,9 @@ You can create your own provider by supplying an HTML template:
 
 ```kotlin
 val myProvider = SanwoProvider(
+    id = "my-gateway",
     name = "my-gateway",
+    displayName = "My Gateway",
     template = """
         <!DOCTYPE html>
         <html>
