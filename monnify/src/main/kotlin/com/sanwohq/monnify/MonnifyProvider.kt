@@ -24,8 +24,7 @@ private const val MONNIFY_TEMPLATE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanwo Checkout</title>
 </head>
-<body onload="initPayment()" style="background-color:#fff;height:100vh">
-  <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
+<body style="background-color:#fff;height:100vh">
   <script>
     {{sanwoBridge}}
 
@@ -77,6 +76,14 @@ private const val MONNIFY_TEMPLATE = """<!DOCTYPE html>
         sanwoCallback('error', { message: e.message });
       }
     }
+
+    var mfScript = document.createElement('script');
+    mfScript.src = 'https://sdk.monnify.com/plugin/monnify.js';
+    mfScript.onload = initPayment;
+    mfScript.onerror = function() {
+      sanwoCallback('error', { message: 'Failed to load Monnify SDK' });
+    };
+    document.body.appendChild(mfScript);
   </script>
 </body>
 </html>"""

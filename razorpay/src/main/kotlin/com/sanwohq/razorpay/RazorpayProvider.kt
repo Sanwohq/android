@@ -24,8 +24,7 @@ private const val RAZORPAY_TEMPLATE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanwo Checkout</title>
 </head>
-<body onload="initPayment()" style="background-color:#fff;height:100vh">
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<body style="background-color:#fff;height:100vh">
   <script>
     {{sanwoBridge}}
 
@@ -76,6 +75,14 @@ private const val RAZORPAY_TEMPLATE = """<!DOCTYPE html>
         sanwoCallback('error', { message: e.message });
       }
     }
+
+    var rzpScript = document.createElement('script');
+    rzpScript.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    rzpScript.onload = initPayment;
+    rzpScript.onerror = function() {
+      sanwoCallback('error', { message: 'Failed to load Razorpay SDK' });
+    };
+    document.body.appendChild(rzpScript);
   </script>
 </body>
 </html>"""

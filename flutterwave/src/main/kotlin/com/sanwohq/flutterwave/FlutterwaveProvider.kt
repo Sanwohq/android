@@ -24,8 +24,7 @@ private const val FLUTTERWAVE_TEMPLATE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanwo Checkout</title>
 </head>
-<body onload="initPayment()" style="background-color:#fff;height:100vh">
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
+<body style="background-color:#fff;height:100vh">
   <script>
     {{sanwoBridge}}
 
@@ -83,6 +82,14 @@ private const val FLUTTERWAVE_TEMPLATE = """<!DOCTYPE html>
         sanwoCallback('error', { message: e.message });
       }
     }
+
+    var flwScript = document.createElement('script');
+    flwScript.src = 'https://checkout.flutterwave.com/v3.js';
+    flwScript.onload = initPayment;
+    flwScript.onerror = function() {
+      sanwoCallback('error', { message: 'Failed to load Flutterwave SDK' });
+    };
+    document.body.appendChild(flwScript);
   </script>
 </body>
 </html>"""
