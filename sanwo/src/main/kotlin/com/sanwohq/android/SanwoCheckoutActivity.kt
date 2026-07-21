@@ -3,13 +3,12 @@ package com.sanwohq.android
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 
@@ -31,11 +30,27 @@ class SanwoCheckoutActivity : AppCompatActivity() {
         val html = intent.getStringExtra(EXTRA_HTML)
         val providerName = intent.getStringExtra(EXTRA_PROVIDER) ?: "unknown"
         val reference = intent.getStringExtra(EXTRA_REFERENCE)
+        val checkoutId = intent.getStringExtra(EXTRA_CHECKOUT_ID)
 
         if (html.isNullOrEmpty()) {
             finishWithError(providerName, reference, "No HTML template provided")
             return
         }
+
+        // Resolve the per-instance emitter via the static registry.
+        val emitter = if (checkoutId != null) {
+            Sanwo.emitterRegistry.remove(checkoutId)
+        } else {
+            null
+        }
+
+        // Handle back press using the modern OnBackPressedDispatcher API.
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                emitter?.emit(SanwoEvent.CANCELLED)
+                finishWithCancelled(providerName, reference)
+            }
+        })
 
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -47,19 +62,13 @@ class SanwoCheckoutActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
 
             addJavascriptInterface(
-                SanwoJSBridge(this@SanwoCheckoutActivity, providerName, reference),
+                SanwoJSBridge(this@SanwoCheckoutActivity, providerName, reference, emitter),
                 "JSBridge",
             )
         }
 
         setContentView(webView)
         webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
-    }
-
-    override fun onBackPressed() {
-        val providerName = intent.getStringExtra(EXTRA_PROVIDER) ?: "unknown"
-        val reference = intent.getStringExtra(EXTRA_REFERENCE)
-        finishWithCancelled(providerName, reference)
     }
 
     override fun onDestroy() {
@@ -79,6 +88,7 @@ class SanwoCheckoutActivity : AppCompatActivity() {
         private val activity: SanwoCheckoutActivity,
         private val providerName: String,
         private val reference: String?,
+        private val emitter: SanwoEventEmitter?,
     ) {
         @JavascriptInterface
         fun showMessageInNative(message: String) {
@@ -91,9 +101,9 @@ class SanwoCheckoutActivity : AppCompatActivity() {
                 val data = json.optJSONObject("data")
                 val dataMap = jsonObjectToMap(data)
 
-                // Emit to global listeners.
+                // Emit to per-instance listeners.
                 SanwoEvent.fromValue(event)?.let { sanwoEvent ->
-                    Sanwo.emitter.emit(sanwoEvent, dataMap)
+                    emitter?.emit(sanwoEvent, dataMap)
                 }
 
                 // Handle terminal events.
@@ -160,34 +170,17 @@ class SanwoCheckoutActivity : AppCompatActivity() {
 
     // -- WebViewClient --
 
-    private class SanwoWebViewClient : WebViewClient() {
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            val url = request?.url ?: return false
-            // Allow payment gateway URLs to load inside the WebView.
-            // Open unknown external URLs in the browser.
-            val host = url.host ?: return false
-            val allowedHosts = listOf(
-                "js.paystack.co",
-                "checkout.paystack.com",
-                "standard.paystack.co",
-                "api.paystack.co",
-                "checkout.flutterwave.com",
-                "api.flutterwave.com",
-                "flutterwave.com",
-            )
-            return if (allowedHosts.any { host.endsWith(it) }) {
-                false // let WebView handle it
-            } else {
-                view?.context?.startActivity(Intent(Intent.ACTION_VIEW, url))
-                true
-            }
-        }
-    }
+    /**
+     * WebViewClient that allows all URLs to load inside the WebView.
+     * This ensures compatibility with any payment provider domain.
+     */
+    private class SanwoWebViewClient : WebViewClient()
 
     companion object {
         internal const val EXTRA_HTML = "com.sanwohq.android.EXTRA_HTML"
         internal const val EXTRA_PROVIDER = "com.sanwohq.android.EXTRA_PROVIDER"
         internal const val EXTRA_REFERENCE = "com.sanwohq.android.EXTRA_REFERENCE"
+        internal const val EXTRA_CHECKOUT_ID = "com.sanwohq.android.EXTRA_CHECKOUT_ID"
 
         internal const val RESULT_TYPE = "com.sanwohq.android.RESULT_TYPE"
         internal const val RESULT_PROVIDER = "com.sanwohq.android.RESULT_PROVIDER"

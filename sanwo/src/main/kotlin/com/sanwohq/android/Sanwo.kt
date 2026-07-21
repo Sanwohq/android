@@ -5,6 +5,9 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Main entry point for the Sanwo payment SDK.
@@ -46,8 +49,11 @@ class Sanwo(
     private val provider: SanwoProvider,
     private val publicKey: String,
 ) {
+    /** Per-instance event emitter so events from different Sanwo instances don't cross-talk. */
+    internal val emitter = SanwoEventEmitter()
+
     /**
-     * Register a global event listener.
+     * Register an event listener on this instance.
      *
      * @param event The event type to listen for.
      * @param listener Callback invoked when the event fires.
@@ -120,9 +126,14 @@ class Sanwo(
         // Notify onLoad/onError via the event emitter.
         registerLifecycleCallbacks(options)
 
+        // Register this instance's emitter so the checkout activity can resolve it.
+        val checkoutId = UUID.randomUUID().toString()
+        emitterRegistry[checkoutId] = emitter
+
         val intent = Intent(activity, SanwoCheckoutActivity::class.java).apply {
             putExtra(SanwoCheckoutActivity.EXTRA_HTML, html)
             putExtra(SanwoCheckoutActivity.EXTRA_PROVIDER, provider.name)
+            putExtra(SanwoCheckoutActivity.EXTRA_CHECKOUT_ID, checkoutId)
             options.reference?.let { putExtra(SanwoCheckoutActivity.EXTRA_REFERENCE, it) }
         }
 
@@ -151,16 +162,24 @@ class Sanwo(
 
         registerLifecycleCallbacks(options)
 
-        // Store the callback for retrieval when the activity returns.
-        pendingCallbacks[REQUEST_CODE] = onResult
+        // Use a unique request code so multiple concurrent checkouts don't collide.
+        val requestCode = requestCodeCounter.getAndIncrement()
+
+        // Store the callback keyed by the unique request code.
+        pendingCallbacks[requestCode] = onResult
+
+        // Register this instance's emitter so the checkout activity can resolve it.
+        val checkoutId = UUID.randomUUID().toString()
+        emitterRegistry[checkoutId] = emitter
 
         val intent = Intent(activity, SanwoCheckoutActivity::class.java).apply {
             putExtra(SanwoCheckoutActivity.EXTRA_HTML, html)
             putExtra(SanwoCheckoutActivity.EXTRA_PROVIDER, provider.name)
+            putExtra(SanwoCheckoutActivity.EXTRA_CHECKOUT_ID, checkoutId)
             options.reference?.let { putExtra(SanwoCheckoutActivity.EXTRA_REFERENCE, it) }
         }
 
-        activity.startActivityForResult(intent, REQUEST_CODE)
+        activity.startActivityForResult(intent, requestCode)
     }
 
     // -- Internal --
@@ -191,10 +210,14 @@ class Sanwo(
     }
 
     companion object {
-        /** Shared event emitter used by the checkout activity bridge. */
-        internal val emitter = SanwoEventEmitter()
+        /**
+         * Static registry that maps a checkout ID to the originating Sanwo instance's emitter.
+         * The checkout activity removes its entry on creation, so entries are short-lived.
+         */
+        internal val emitterRegistry = ConcurrentHashMap<String, SanwoEventEmitter>()
 
-        private const val REQUEST_CODE = 0x53_41  // "SA" in hex
+        /** Counter for generating unique request codes for concurrent checkouts. */
+        private val requestCodeCounter = AtomicInteger(0x5341) // start at "SA" in hex
 
         /**
          * Call this from your Activity's `onActivityResult` if you used the callable
@@ -209,8 +232,7 @@ class Sanwo(
          */
         @Suppress("DEPRECATION")
         fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            if (requestCode != REQUEST_CODE) return
-            val callback = pendingCallbacks.remove(REQUEST_CODE) ?: return
+            val callback = pendingCallbacks.remove(requestCode) ?: return
             val result = if (resultCode == Activity.RESULT_OK) {
                 SanwoCheckoutActivity.parseResult(data)
             } else {
@@ -219,6 +241,6 @@ class Sanwo(
             callback(result)
         }
 
-        private val pendingCallbacks = mutableMapOf<Int, (CheckoutResult) -> Unit>()
+        private val pendingCallbacks = ConcurrentHashMap<Int, (CheckoutResult) -> Unit>()
     }
 }
