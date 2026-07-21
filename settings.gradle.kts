@@ -22,6 +22,4 @@ include(":flutterwave")
 
 include(":interswitch")
 include(":monnify")
-include(":paypal")
 include(":razorpay")
-include(":stripe")

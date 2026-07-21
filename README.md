@@ -148,8 +148,6 @@ Each provider is shipped as a separate module so you only include what you need.
 |---|---|---|---|
 | Paystack | `com.sanwohq:paystack` | `com.sanwohq.paystack.paystackProvider` | Amounts in kobo (minor units) |
 | Flutterwave | `com.sanwohq:flutterwave` | `com.sanwohq.flutterwave.flutterwaveProvider` | Amounts auto-converted from minor to major units |
-| Stripe | `com.sanwohq:stripe` | `com.sanwohq.stripe.stripeProvider` | |
-| PayPal | `com.sanwohq:paypal` | `com.sanwohq.paypal.paypalProvider` | |
 | Razorpay | `com.sanwohq:razorpay` | `com.sanwohq.razorpay.razorpayProvider` | |
 | Monnify | `com.sanwohq:monnify` | `com.sanwohq.monnify.monnifyProvider` | |
 | Interswitch | `com.sanwohq:interswitch` | `com.sanwohq.interswitch.interswitchProvider` | |
