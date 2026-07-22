@@ -30,6 +30,23 @@ Sanwo is a universal payment SDK. This is the Android/Kotlin library that wraps 
 - `paystack/src/main/kotlin/com/sanwohq/paystack/PaystackProvider.kt` -- Paystack provider module
 - `flutterwave/src/main/kotlin/com/sanwohq/flutterwave/FlutterwaveProvider.kt` -- Flutterwave provider module
 
+## CI/CD
+
+### CI (`ci.yml`)
+- **Triggers**: push to main, PRs to main
+- **Job**: `build` — sets up JDK 17 (temurin), Gradle, runs `./gradlew build`
+- No secrets required
+
+### Publishing
+- Published via **JitPack** — no CI publish step needed
+- JitPack builds automatically from git tags
+- To publish: create a GitHub release with a version tag (e.g., `v0.1.0`)
+- Users add `implementation 'com.github.Sanwohq:android:<tag>'` to their Gradle dependencies
+
+### Provider templates
+- Templates must use dynamic script loading (createElement + onload), not static `<script src>` tags — static tags cause race conditions in WebViews
+- When core repo publishes template updates, `sync-native-providers.mjs` pushes changes to this repo automatically (requires `NATIVE_SYNC_TOKEN`)
+
 ## Conventions
 
 - Core SDK package: `com.sanwohq.android`
