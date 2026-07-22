@@ -1,0 +1,4 @@
+jdk:
+  - openjdk17
+install:
+  - ./gradlew :sanwo:publishToMavenLocal :paystack:publishToMavenLocal :flutterwave:publishToMavenLocal :razorpay:publishToMavenLocal :monnify:publishToMavenLocal :interswitch:publishToMavenLocal
