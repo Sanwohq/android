@@ -21,9 +21,6 @@ gen/
 out/
 release/
 
-# Example app keys
-example/src/main/kotlin/com/example/sanwocheckout/Config.kt
-
 # Kotlin
 *.kotlin_module
 
