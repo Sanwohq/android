@@ -72,7 +72,7 @@ internal object Engine {
             params.put("amount", fromMinorUnit(options.amount, options.currency))
         }
 
-        options.reference?.let { params.put("reference", it) }
+        params.put("reference", options.reference ?: generateReference())
         options.customer.firstName?.let { params.put("firstName", it) }
         options.customer.lastName?.let { params.put("lastName", it) }
         options.customer.phone?.let { params.put("phone", it) }
@@ -116,6 +116,11 @@ internal object Engine {
         return template
             .replace("{{sanwoBridge}}", bridge)
             .replace("{{params}}", params.toString())
+    }
+
+    private fun generateReference(): String {
+        val chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+        return "sanwo_" + (1..12).map { chars.random() }.joinToString("")
     }
 
     // -- Helpers --
