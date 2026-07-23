@@ -1,19 +1,6 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("maven-publish")
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-                groupId = "com.github.Sanwohq.android"
-                artifactId = "razorpay"
-            }
-        }
-    }
 }
 
 android {
